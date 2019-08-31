@@ -29,6 +29,28 @@ export class GuildService {
         return guild.adminId;
     }
 
+    public async setAdmin(guildId: string, adminId: string) {
+        const guild = await this.findGuild(guildId);
+        if (guild) {
+            await this.serverRepository.update(guild.id, { adminId });
+        } else {
+            this.logger.error(`No guild found in database for: ${guildId}`);
+        }
+    
+        await this.clearCache();
+    }
+
+    public async setPrefix(guildId: string, prefix: string) {
+        const guild = await this.findGuild(guildId);
+        if (guild) {
+            await this.serverRepository.update(guild.id, { prefix });
+        } else {
+            this.logger.error(`No guild found in database for: ${guildId}`);
+        }
+
+        this.clearCache();
+    }
+
     public async findGuild(guildId: string): Promise<Guild | null> {
         try {
             const guild = await this.serverRepository.findOne({ 
@@ -68,10 +90,14 @@ export class GuildService {
             if (foundGuild) {
                 await this.serverRepository.delete(foundGuild.id);
             }
-            await this.orm.getConnection().queryResultCache.remove(["servers"]);
+            await this.clearCache();
             this.logger.info("Guild has been succesfully removed from the database.");
         } catch (err) {
             this.logger.error("Failed to remove guild to database.");
         }
+    }
+
+    private async clearCache() {
+        await this.orm.getConnection().queryResultCache.remove(["servers"]);
     }
 }

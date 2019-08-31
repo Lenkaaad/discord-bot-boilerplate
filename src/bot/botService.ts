@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { D } from "../services/discordClient";
 import { Logger } from "../utils/logger";
-import { CommandService } from "./commandService";
+import { DefaultCommandService } from "./defaultCommandService";
 import { GuildService } from "./guildService";
 import { IssueTracker } from "../utils/issueTracker";
 require(`dotenv`).config();
@@ -15,7 +15,8 @@ export class BotService {
         private D: D,
         private issueTracker: IssueTracker,
         private logger: Logger,
-        private guildService: GuildService
+        private guildService: GuildService,
+        private defaultCommandService: DefaultCommandService
     ) 
     {
         this.logger.init("BotService");
@@ -44,10 +45,10 @@ export class BotService {
             const prefix = await this.guildService.getPrefix(message.member.guild.id);
 
             if (prefix && message.content.startsWith(prefix)) {
-                const [command, ...args] = message.content.substr(prefix.length).split(" ");
+                const [command, ...args] = message.content.substr(prefix.length + 1).split(" ");
                 console.log("Command: ", command, "Args: ", args);
                 
-                // pass command and args to commandService to handle it
+                this.defaultCommandService.executeCommand(message, command, args);
             }
 
             // check what guild this is: message.member.guild.id
