@@ -4,7 +4,6 @@ const chalk = require('chalk');
 @injectable()
 export class Logger {
     constructor() {
-        this.init("Logger");
     }
 
     public init(object: string) {

@@ -89,9 +89,9 @@ export class GuildService {
 
             if (foundGuild) {
                 await this.serverRepository.delete(foundGuild.id);
+                await this.clearCache();
+                this.logger.info("Guild has been succesfully removed from the database.");
             }
-            await this.clearCache();
-            this.logger.info("Guild has been succesfully removed from the database.");
         } catch (err) {
             this.logger.error("Failed to remove guild to database.");
         }

@@ -6,7 +6,9 @@ import { Logger } from "./utils/logger";
 getContainer()
     .then(async container => {
         const logger = container.get(Logger);
+        logger.alert("Node version: " + process.version); 
         logger.init("Container");
+
         try {
             const botService = container.get(BotService);
             botService.start();

@@ -2,6 +2,8 @@ import { decorate, injectable, inject } from "inversify";
 import { Connection, Repository, createConnection } from "typeorm";
 import { Server } from "./entities/server";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import { User } from "./entities/user";
+import { AllowedChannel } from "./entities/allowedChannel";
 
 decorate(injectable(), Repository);
 
@@ -26,7 +28,9 @@ export class ORM {
                 url: this.dbUrl,
 
                 entities: [
-                    Server
+                    Server,
+                    User,
+                    AllowedChannel
                 ],
                 synchronize: this.sync,
                 logging: ["query", "schema"],

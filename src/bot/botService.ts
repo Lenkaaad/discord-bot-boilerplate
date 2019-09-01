@@ -4,6 +4,7 @@ import { Logger } from "../utils/logger";
 import { DefaultCommandService } from "./defaultCommandService";
 import { GuildService } from "./guildService";
 import { IssueTracker } from "../utils/issueTracker";
+import { ChannelService } from "./channelService";
 require(`dotenv`).config();
 
 @injectable()
@@ -16,6 +17,7 @@ export class BotService {
         private issueTracker: IssueTracker,
         private logger: Logger,
         private guildService: GuildService,
+        private channelService: ChannelService,
         private defaultCommandService: DefaultCommandService
     ) 
     {
@@ -49,6 +51,15 @@ export class BotService {
                 console.log("Command: ", command, "Args: ", args);
                 
                 this.defaultCommandService.executeCommand(message, command, args);
+
+                const exists = await this.channelService.channelExists(message.channel.id);
+
+                if (exists) {
+                    this.logger.info("Channel is whitelisted.");
+                    // allow other commandService
+                } else {
+                    return;
+                }
             }
 
             // check what guild this is: message.member.guild.id

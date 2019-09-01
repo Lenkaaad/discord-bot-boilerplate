@@ -9,6 +9,8 @@ import { DefaultCommandService } from "./bot/defaultCommandService";
 import { Logger } from "./utils/logger";
 import { GuildService } from "./bot/guildService";
 import { IssueTracker } from "./utils/issueTracker";
+import { UserService } from "./bot/userService";
+import { ChannelService } from "./bot/channelService";
 
 export const getContainer = async () => {
     const container = new Container();
@@ -23,6 +25,8 @@ export const getContainer = async () => {
     container.bind(BotService).toSelf();
     container.bind(DefaultCommandService).toSelf();
     container.bind(GuildService).toSelf();
+    container.bind(UserService).toSelf();
+    container.bind(ChannelService).toSelf();
 
     return container;
 };

@@ -14,6 +14,8 @@ export class D {
         this._client.login(process.env.BOT_DEV_TOKEN);
 
         this.logger.init("DiscordClient");
+        this.logger.alert("Discord.js version: " + Discord.version);
+        
     }
 
     public get client() {
