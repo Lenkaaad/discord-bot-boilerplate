@@ -51,6 +51,16 @@ export class GuildService {
         this.clearCache();
     }
 
+    public async isUserAdmin(guildId: string, userId: string): Promise<Boolean> {
+        const guild = await this.findGuild(guildId);
+
+        if (guild) {
+            return guild.adminId === userId ? true : false;
+        }
+
+        return false;
+    }
+
     public async findGuild(guildId: string): Promise<Guild | null> {
         try {
             const guild = await this.serverRepository.findOne({ 

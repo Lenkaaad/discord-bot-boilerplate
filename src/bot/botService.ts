@@ -5,6 +5,8 @@ import { DefaultCommandService } from "./defaultCommandService";
 import { GuildService } from "./guildService";
 import { IssueTracker } from "../utils/issueTracker";
 import { ChannelService } from "./channelService";
+import { CustomCommandService } from "./customCommandService";
+
 require(`dotenv`).config();
 
 @injectable()
@@ -18,7 +20,8 @@ export class BotService {
         private logger: Logger,
         private guildService: GuildService,
         private channelService: ChannelService,
-        private defaultCommandService: DefaultCommandService
+        private defaultCommandService: DefaultCommandService,
+        private customCommandService: CustomCommandService
     ) 
     {
         this.logger.init("BotService");
@@ -40,42 +43,41 @@ export class BotService {
     private startMessageHandler() {
         this.Discord.client.on("message", async message => {
             // ignore all messages coming from other bots
-            if (message.author.bot) {
-                return;
-            }
+            if (message.author.bot) return;
 
             const prefix = await this.guildService.getPrefix(message.member.guild.id);
 
             if (prefix && message.content.startsWith(prefix)) {
                 const [command, ...args] = message.content.substr(prefix.length + 1).split(" ");
                 console.log("Command: ", command, "Args: ", args);
+        
+                const isAdmin = await this.guildService.isUserAdmin(message.member.guild.id, message.member.id);
                 
-                this.defaultCommandService.executeCommand(message, command, args);
+                if (isAdmin) {
+                    this.defaultCommandService.executeCommand(message, command, args);
+                }
 
                 const exists = await this.channelService.channelExists(message.channel.id);
 
                 if (exists) {
                     this.logger.info("Channel is whitelisted.");
-                    // allow other commandService
+                    this.customCommandService.executeCommand(message, command, args);
                 } else {
                     return;
                 }
             }
-
-            // check what guild this is: message.member.guild.id
-            // author: message.author.id
         })
     }
 
     private guildActivityHandler() {
         this.Discord.client.on("guildCreate", guild => {
-            this.logger.info("Guild has added bot");
+            this.logger.info(`Guild ${guild.id} - ${guild.name} has added bot.`);
             // start guild add db procedure
             this.guildService.createGuild(guild);
         });
 
         this.Discord.client.on("guildDelete", guild => {
-            this.logger.info("Guild has removed bot");
+            this.logger.info(`Guild ${guild.id} - ${guild.name} has removed bot`);
             // start guild remove db procedure
             this.guildService.deleteGuild(guild);
         });

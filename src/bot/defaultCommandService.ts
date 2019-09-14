@@ -3,6 +3,10 @@ import { Logger } from "../utils/logger";
 import { GuildService } from "./guildService";
 import { UserService } from "./userService";
 import { ChannelService } from "./channelService";
+import { AdminCommandService } from "./admin/adminCommandService";
+import { config } from "../../botConfig";
+import { BotType } from "../types/botConfig";
+import { MusicCommandService } from "./music/musicCommandService";
 
 @injectable()
 export class DefaultCommandService {
@@ -10,9 +14,11 @@ export class DefaultCommandService {
         private logger: Logger,
         private guildService: GuildService,
         private userService: UserService,
-        private channelService: ChannelService
+        private channelService: ChannelService,
+        private adminCommandService: AdminCommandService,
+        private musicCommandService: MusicCommandService
     ) {
-        this.logger.init("CommandService");
+        this.logger.init("Default:CommandService");
     }
 
     public executeCommand(messageData: any, command: string, args: [string]) {
@@ -25,11 +31,11 @@ export class DefaultCommandService {
                 this.logger.warning("Prefix request.");
                 this.setPrefix(messageData.member.guild.id, args[0]);
                 break;
-            case "initMe":
+            case "createMe":
                 this.logger.warning("User init request.");
                 this.initUser(messageData.member, messageData.member.guild.id);
                 break;
-            case "initChannel":
+            case "addChannel":
                 this.logger.warning("Channel init request.")
                 this.initChannel(messageData.channel, messageData.member.guild.id);
                 break;
@@ -39,11 +45,22 @@ export class DefaultCommandService {
             default:
                 break;
         }
+
+        switch(config.type) {
+            case BotType.Admin:
+                this.adminCommandService.executeCommand(messageData, command, args);
+                break;
+            case BotType.Music:
+                this.musicCommandService.executeCommand(messageData, command, args);
+                break;
+            default:
+                break;
+        }
     }
 
     private async setPrefix(guildId: string, prefix: string) {
         if (prefix === "" || prefix === " ") {
-            this.logger.error("Invalid prefix for setAdmin command");
+            this.logger.error(`${guildId}: Invalid prefix for setAdmin command`);
             return;
         }
 
@@ -52,14 +69,14 @@ export class DefaultCommandService {
 
     private async setAdmin(mentions: any, guildId: string) {
         if (mentions.everyone) {
-            this.logger.error("Invalid tag for setAdmin command");
+            this.logger.error(`${guildId}: Invalid tag for setAdmin command`);
             return;
         }
 
         const tagged = mentions.users.map(item => item.id);
 
         if (mentions.users.length > 1) {
-            this.logger.warning("More than 1 tag added. Ignoring all except first.");
+            this.logger.warning(`${guildId}: More than 1 tag added. Ignoring all except first.`);
         }
 
         await this.guildService.setAdmin(guildId, tagged[0]);

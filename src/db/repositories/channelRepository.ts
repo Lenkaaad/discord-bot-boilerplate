@@ -12,7 +12,7 @@ interface Existence {
 export class ChannelRepository extends Repository<AllowedChannel> {
     
     public async exists(channelId: string): Promise<Existence> {
-        const channel = await this.findOne({ where: { channelId }, cache: { id: "channels", milliseconds: 1000 * 60 * 60 }});
+        const channel = await this.findOne({ where: { channelId }, cache: { id: "channels", milliseconds: 1000 * 60 }});
         return channel ? { exists: true, id: channel.id } : { exists: false };
     }
 }

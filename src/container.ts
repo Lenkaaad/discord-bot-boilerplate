@@ -11,6 +11,9 @@ import { GuildService } from "./bot/guildService";
 import { IssueTracker } from "./utils/issueTracker";
 import { UserService } from "./bot/userService";
 import { ChannelService } from "./bot/channelService";
+import { AdminCommandService } from "./bot/admin/adminCommandService";
+import { MusicCommandService } from "./bot/music/musicCommandService";
+import { CustomCommandService } from "./bot/customCommandService";
 
 export const getContainer = async () => {
     const container = new Container();
@@ -27,6 +30,9 @@ export const getContainer = async () => {
     container.bind(GuildService).toSelf();
     container.bind(UserService).toSelf();
     container.bind(ChannelService).toSelf();
+    container.bind(AdminCommandService).toSelf();
+    container.bind(MusicCommandService).toSelf();
+    container.bind(CustomCommandService).toSelf();
 
     return container;
 };
